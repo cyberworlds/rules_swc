@@ -203,10 +203,9 @@ def _calculate_source_file(ctx, src):
     return paths.join(s, src_pkg, src.basename)
 
 def _swc_action(ctx, swc_binary, **kwargs):
-    ctx.actions.run(
-        mnemonic = "SWCCompile",
-        progress_message = "Compiling %{label} [swc %{input}]",
-        executable = swc_binary,
+    execution_requirements = kwargs.pop("execution_requirements", default = {})
+
+    execution_requirements.update({
         # NOTE(calebmer): We want SWC to correctly transform our imports using the `baseUrl`
         # and `paths` configuration options. This requires the input file and output file to
         # be in the same directory. `copy_file_to_bin_action()` is executed with
@@ -218,7 +217,18 @@ def _swc_action(ctx, swc_binary, **kwargs):
         # Not sandboxing means we have to trust SWC to be hermetic. This is a dangerous
         # assumption. SWC could look at `package.json` or `.swcrc` files it is not supposed
         # to. Generally SWC is a small, focused, tool so we trust it to behave hermetically.
-        execution_requirements = {"no-sandbox": "1"},
+        #
+        # NOTE(calebmer, 2024-11-15): We might not need this patch anymore. Looks like
+        # `rules_swc` was updated to include `"no-sandbox": "1"` by default in some
+        # scenarios.
+        "no-sandbox": "1",
+    })
+
+    ctx.actions.run(
+        mnemonic = "SWCCompile",
+        progress_message = "Compiling %{label} [swc %{input}]",
+        executable = swc_binary,
+        execution_requirements = execution_requirements,
         **kwargs
     )
 
