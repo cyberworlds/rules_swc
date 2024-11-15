@@ -28,24 +28,6 @@ swc_register_toolchains(
 )
 ```
 
-### Other versions
-
-To use an swc version which is not mirrored to rules_swc, use `integrity_hashes`.
-
-For example in `WORKSPACE`:
-
-```starlark
-swc_register_toolchains(
-    name = "swc",
-    integrity_hashes = {
-        "darwin-arm64": "sha384-IhP/76Zi5PEfsrGwPJj/CLHu2afxSBO2Fehp/qo4uHVXez08dcfyd9UzrcUI1z1q",
-        "darwin-x64": "sha384-s2wH7hzaMbTbIkgPpP5rAYThH/+H+RBQ/5xKbpM4lfwPMS6cNBIpjKVnathrENm/",
-        "linux-arm64-gnu": "sha384-iaBhMLrnHTSfXa86AVHM6zHqYbH3Fh1dWwDeH7sW9HKvX2gbQb6LOpWN6Wp4ddud",
-        "linux-x64-gnu": "sha384-R/y9mcodpNt8l6DulUCG5JsNMrApP+vOAAh3bTRChh6LQKP0Z3Fwq86ztfObpAH8",
-    },
-    swc_version = "1.3.37",
-)
-```
 """
 
 load("@bazel_skylib//lib:versions.bzl", "versions")
@@ -53,7 +35,10 @@ load("//swc/private:toolchains_repo.bzl", "PLATFORMS", "toolchains_repo")
 load("//swc/private:versions.bzl", "TOOL_VERSIONS")
 
 # Expose as Public API
-LATEST_SWC_VERSION = TOOL_VERSIONS.keys()[0]
+# NB: we don't use the "most recent release" since swc has a history of often breaking Bazel usage
+# with subtle changes that get through their tests.
+# So instead, this reflects the latest version that is "known good" according to our test suite.
+LATEST_SWC_VERSION = "v1.6.6"
 
 # TODO(2.0): remove this alias
 LATEST_VERSION = LATEST_SWC_VERSION

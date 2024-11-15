@@ -3,7 +3,7 @@
 load("//swc:providers.bzl", "SwcPluginConfigInfo")
 
 _attrs = {
-    "src": attr.label(
+    "srcs": attr.label_list(
         doc = "label for the plugin, either a directory containing a package.json pointing at a wasm file as the main entrypoint, or a wasm file",
         providers = [DefaultInfo],
         mandatory = True,
@@ -15,10 +15,10 @@ _attrs = {
     ),
 }
 
-def _impl(ctx):
+def _swc_plugin_impl(ctx):
     return [
         DefaultInfo(
-            files = ctx.attr.src[DefaultInfo].files,
+            files = depset(ctx.files.srcs),
         ),
         SwcPluginConfigInfo(
             label = ctx.label,
@@ -28,6 +28,6 @@ def _impl(ctx):
 
 swc_plugin = struct(
     attrs = _attrs,
-    implementation = _impl,
+    implementation = _swc_plugin_impl,
     provides = [DefaultInfo, SwcPluginConfigInfo],
 )

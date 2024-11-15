@@ -1,6 +1,6 @@
-load("@aspect_rules_swc//swc:defs.bzl", "swc")
-load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
 load("@aspect_bazel_lib//lib:testing.bzl", "assert_json_matches")
+load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
+load("@aspect_rules_swc//swc:defs.bzl", "swc")
 
 swc(
     name = "compile",
@@ -31,5 +31,9 @@ write_source_files(
         filter1 = ".sourceRoot,.sources",
         filter2 = ".sourceRoot,.sources",
     )
-    for f in ["a", "b", "sub/c"]
+    for f in [
+        "a",
+        "b",
+        "sub/c",
+    ]
 ]

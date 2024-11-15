@@ -3,9 +3,9 @@
 See https://github.com/swc-project/plugins
 """
 
-load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
-load("@aspect_bazel_lib//lib:directory_path.bzl", "directory_path")
 load("@aspect_bazel_lib//lib:copy_file.bzl", "copy_file")
+load("@aspect_bazel_lib//lib:directory_path.bzl", "directory_path")
+load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
 load("@aspect_rules_swc//swc:defs.bzl", "swc", "swc_plugin")
 load("@npm//:defs.bzl", "npm_link_all_packages")
 
@@ -16,7 +16,11 @@ npm_link_all_packages(name = "node_modules")
 # This requires that the package.json includes a main entrypoint pointing at the plugin wasm file.
 swc_plugin(
     name = "npm_plugin",
-    src = ":node_modules/@swc/plugin-transform-imports",
+    srcs = [
+        # reference the location where the "@swc/plugin-transform-imports" npm package was linked in our root Bazel package.
+        ":node_modules/@swc/plugin-transform-imports",
+        ":node_modules/@swc/plugin-transform-imports/dir",
+    ],
     # optional plugin config, the JSON object for the plugin passed into jsc.experimental.plugins
     # https://swc.rs/docs/configuration/compilation#jscexperimentalplugins
     config = {

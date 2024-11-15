@@ -19,27 +19,15 @@ swc_register_toolchains(
     swc_version = LATEST_SWC_VERSION,
 )
 
-load("@aspect_bazel_lib//lib:repositories.bzl", "aspect_bazel_lib_dependencies", "register_jq_toolchains")
+load("@aspect_rules_js//js:toolchains.bzl", "DEFAULT_NODE_VERSION", "rules_js_register_toolchains")
 
-aspect_bazel_lib_dependencies(override_local_config_platform = True)
+rules_js_register_toolchains(node_version = DEFAULT_NODE_VERSION)
 
-register_jq_toolchains()
-
-load("@aspect_rules_js//js:repositories.bzl", "rules_js_dependencies")
-
-rules_js_dependencies()
-
-load("@rules_nodejs//nodejs:repositories.bzl", "DEFAULT_NODE_VERSION", "nodejs_register_toolchains")
-
-nodejs_register_toolchains(
-    name = "nodejs",
-    node_version = DEFAULT_NODE_VERSION,
-)
-
-load("@aspect_rules_js//npm:npm_import.bzl", "npm_translate_lock")
+load("@aspect_rules_js//npm:repositories.bzl", "npm_translate_lock")
 
 npm_translate_lock(
     name = "npm",
+    npmrc = "//:.npmrc",
     pnpm_lock = "//examples:pnpm-lock.yaml",
     verify_node_modules_ignored = "//:.bazelignore",
 )
@@ -53,12 +41,32 @@ load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 bazel_skylib_workspace()
 
 ############################################
-# Gazelle, for generating bzl_library targets
-load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
+# Stardoc
+load("@io_bazel_stardoc//:setup.bzl", "stardoc_repositories")
 
-go_rules_dependencies()
+stardoc_repositories()
 
-go_register_toolchains(version = "1.19.3")
+load("@rules_jvm_external//:repositories.bzl", "rules_jvm_external_deps")
 
-gazelle_dependencies()
+rules_jvm_external_deps()
+
+load("@rules_jvm_external//:setup.bzl", "rules_jvm_external_setup")
+
+rules_jvm_external_setup()
+
+load("@io_bazel_stardoc//:deps.bzl", "stardoc_external_deps")
+
+stardoc_external_deps()
+
+load("@stardoc_maven//:defs.bzl", stardoc_pinned_maven_install = "pinned_maven_install")
+
+stardoc_pinned_maven_install()
+
+# Buildifier
+load("@buildifier_prebuilt//:deps.bzl", "buildifier_prebuilt_deps")
+
+buildifier_prebuilt_deps()
+
+load("@buildifier_prebuilt//:defs.bzl", "buildifier_prebuilt_register_toolchains")
+
+buildifier_prebuilt_register_toolchains()

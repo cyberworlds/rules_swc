@@ -1,14 +1,21 @@
+load("@aspect_bazel_lib//lib:utils.bzl", bazel_lib_utils = "utils")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("@bazel_gazelle//:def.bzl", "gazelle", "gazelle_binary")
+load("@buildifier_prebuilt//:rules.bzl", "buildifier")
 
-gazelle_binary(
-    name = "gazelle_bin",
-    languages = ["@bazel_skylib_gazelle_plugin//bzl"],
+buildifier(
+    name = "buildifier",
+    exclude_patterns = ["./.git/*"],
+    lint_mode = "fix",
+    mode = "fix",
+    tags = ["manual"],  # tag as manual so windows ci does not build it by default
 )
 
-gazelle(
-    name = "gazelle",
-    gazelle = "gazelle_bin",
+buildifier(
+    name = "buildifier.check",
+    exclude_patterns = ["./.git/*"],
+    lint_mode = "warn",
+    mode = "diff",
+    tags = ["manual"],  # tag as manual so windows ci does not build it by default
 )
 
 bzl_library(
@@ -18,5 +25,5 @@ bzl_library(
     deps = [
         "@bazel_tools//tools/build_defs/repo:http.bzl",
         "@bazel_tools//tools/build_defs/repo:utils.bzl",
-    ],
+    ] + (["@bazel_tools//tools/build_defs/repo:cache.bzl"] if bazel_lib_utils.is_bazel_7_or_greater() else []),
 )
