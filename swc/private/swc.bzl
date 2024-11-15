@@ -191,6 +191,18 @@ def _swc_action(ctx, swc_binary, **kwargs):
         mnemonic = "SWCCompile",
         progress_message = "Compiling %{label} [swc %{input}]",
         executable = swc_binary,
+        # NOTE(calebmer): We want SWC to correctly transform our imports using the `baseUrl`
+        # and `paths` configuration options. This requires the input file and output file to
+        # be in the same directory. `copy_file_to_bin_action()` is executed with
+        # `execution_requirements` including `"no-sandbox": "1"`. This means our input file
+        # is linked from `execroot` when we create a sandbox however we want to output in
+        # the sandbox. So execute SWC outside of a sandbox too so our input and output have
+        # the same base path.
+        #
+        # Not sandboxing means we have to trust SWC to be hermetic. This is a dangerous
+        # assumption. SWC could look at `package.json` or `.swcrc` files it is not supposed
+        # to. Generally SWC is a small, focused, tool so we trust it to behave hermetically.
+        execution_requirements = {"no-sandbox": "1"},
         **kwargs
     )
 
